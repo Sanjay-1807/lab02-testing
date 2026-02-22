@@ -1,0 +1,21 @@
+{
+  "name": "lab02-testing",
+  "version": "1.0.0",
+  "description": "Lab 02 | Unit Testing with Node.js and Jest",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "jest",
+    "unit-testing",
+    "tdd",
+    "nodejs",
+    "software-quality"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
