@@ -1,0 +1,110 @@
+// apiClient.test.js
+
+const {
+  fetchUsers,
+  fetchUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} = require("./apiClient");
+
+describe("apiClient", () => {
+  const mockUsers = [
+    { id: 1, name: "User 1", email: "user1@example.com" },
+    { id: 2, name: "User 2", email: "user2@example.com" },
+  ];
+
+  beforeEach(() => {
+    jest.spyOn(global, "fetch");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("fetchUsers() should return an array", async () => {
+    global.fetch.mockResolvedValue({
+      json: async () => mockUsers,
+    });
+
+    const users = await fetchUsers();
+    expect(Array.isArray(users)).toBe(true);
+    expect(users).toHaveLength(2);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("fetchUserById() should return an object with id, name, and email", async () => {
+    global.fetch.mockResolvedValue({
+      json: async () => mockUsers[0],
+    });
+
+    const user = await fetchUserById(1);
+    expect(user).toHaveProperty("id", 1);
+    expect(user).toHaveProperty("name");
+    expect(user).toHaveProperty("email");
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://jsonplaceholder.typicode.com/users/1"
+    );
+  });
+
+  it("createUser() should return a new user object with an ID", async () => {
+    const newUser = { name: "New User", email: "new@example.com" };
+    const createdUser = { id: 101, ...newUser };
+
+    global.fetch.mockResolvedValue({
+      json: async () => createdUser,
+    });
+
+    const result = await createUser(newUser);
+
+    expect(result).toHaveProperty("id");
+    expect(result.name).toBe("New User");
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://jsonplaceholder.typicode.com/users",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      })
+    );
+  });
+
+  it("updateUser() should modify an existing user", async () => {
+    const updates = { name: "Updated Name", email: "updated@example.com" };
+    const updatedUser = { id: 1, ...updates };
+
+    global.fetch.mockResolvedValue({
+      json: async () => updatedUser,
+    });
+
+    const result = await updateUser(1, updates);
+
+    expect(result.id).toBe(1);
+    expect(result.name).toBe("Updated Name");
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://jsonplaceholder.typicode.com/users/1",
+      expect.objectContaining({
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      })
+    );
+  });
+
+  it("deleteUser() should return a success response (mocked)", async () => {
+    // JSONPlaceholder often returns {} for delete; we can treat that as success for this lab.
+    const deleteResponse = { success: true };
+
+    global.fetch.mockResolvedValue({
+      json: async () => deleteResponse,
+    });
+
+    const result = await deleteUser(1);
+
+    expect(result).toEqual({ success: true });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://jsonplaceholder.typicode.com/users/1",
+      expect.objectContaining({ method: "DELETE" })
+    );
+  });
+});
